@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>English → Sanskrit Translator</title>
+<style>
+:root{--bg:#f5f7fb;--card:#fff;--text:#182033;--muted:#687386;--accent:#6d28d9;--border:#e4e7ec}
+.dark{--bg:#0f1117;--card:#181b23;--text:#f4f4f5;--muted:#a1a1aa;--border:#30343f}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text);transition:.25s}
+header{padding:34px 20px;text-align:center;background:linear-gradient(135deg,var(--accent),#8b5cf6);color:#fff}
+header h1{margin:0;font-size:clamp(28px,5vw,42px)}header p{margin:10px 0 0;opacity:.9}
+.top{max-width:1050px;margin:18px auto 0;padding:0 20px;display:flex;justify-content:flex-end}
+button{border:0;border-radius:10px;padding:11px 16px;font-size:15px;cursor:pointer;background:var(--accent);color:#fff;font-weight:600}
+.theme{background:var(--card);color:var(--text);border:1px solid var(--border)}
+main{max-width:1050px;margin:18px auto 40px;padding:0 20px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:20px;box-shadow:0 8px 25px #0000000a}.card h2{margin:0 0 14px}
+textarea,#output{width:100%;height:245px;resize:vertical;border:1px solid var(--border);border-radius:12px;background:var(--bg);color:var(--text);padding:15px;font:17px Arial;outline:0}
+#output{font-size:24px;line-height:1.7;overflow:auto;white-space:pre-wrap}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:13px}
+.secondary{background:transparent;color:var(--text);border:1px solid var(--border)}.info{text-align:center;color:var(--muted);font-size:14px;margin-top:18px}
+footer{text-align:center;color:var(--muted);padding:10px 20px 30px;font-size:14px}
+@media(max-width:760px){.grid{grid-template-columns:1fr}.top{justify-content:center}}
+</style>
+</head>
+<body>
+<header><h1>English → Sanskrit Translator</h1><p>Made by Bhagya. By completing the challenge of Pranab Jyoti Borua.</p></header>
+<div class="top"><button class="theme" onclick="toggleDark()">🌙 Dark Mode</button></div>
+<main><div class="grid">
+<section class="card"><h2>English</h2><textarea id="english" placeholder="Type a sentence, e.g. I am a student"></textarea>
+<div class="actions"><button onclick="translateText()">Translate</button><button class="secondary" onclick="clearAll()">Clear</button></div></section>
+<section class="card"><h2>Sanskrit</h2><div id="output">Translation will appear here...</div>
+<div class="actions"><button onclick="copyText()">📋 Copy</button><button onclick="speak()">🔊 Pronounce</button></div></section>
+</div><div class="info">Offline dictionary-based translator • 150+ common words • Dark mode • Pronunciation</div></main>
+<footer>English → Sanskrit Translator</footer>
+<script>
+const D={
+"hello":"नमस्ते","hi":"नमस्ते","goodbye":"पुनर्दर्शनाय","please":"कृपया","thanks":"धन्यवादः",
+"i":"अहम्","you":"त्वम्","he":"सः","she":"सा","it":"तत्","we":"वयम्","they":"ते",
+"my":"मम","your":"तव","his":"तस्य","her":"तस्याः","our":"अस्माकम्","their":"तेषाम्",
+"am":"अस्मि","is":"अस्ति","are":"सन्ति","was":"आसीत्","were":"आसन्",
+"a":"","an":"","the":"","and":"च","or":"वा","but":"किन्तु","not":"न","very":"अतीव","also":"अपि","with":"सह","for":"कृते","to":"प्रति",
+"what":"किम्","who":"कः","whom":"कम्","where":"कुत्र","when":"कदा","why":"किमर्थम्","how":"कथम्",
+"yes":"आम्","no":"न","maybe":"कदाचित्","name":"नाम","friend":"मित्रम्","boy":"बालकः","girl":"बालिका",
+"man":"पुरुषः","woman":"स्त्री","child":"बालकः","people":"जनाः","mother":"माता","father":"पिता",
+"brother":"भ्राता","sister":"भगिनी","son":"पुत्रः","daughter":"पुत्री","family":"परिवारः",
+"teacher":"शिक्षकः","student":"छात्रः","doctor":"चिकित्सकः","king":"राजा","queen":"रानी",
+"school":"विद्यालयः","college":"महाविद्यालयः","university":"विश्वविद्यालयः","class":"कक्षा","book":"पुस्तकम्","pen":"लेखनी",
+"house":"गृहम्","home":"गृहम्","room":"कक्षः","door":"द्वारम्","road":"मार्गः","city":"नगरम्","village":"ग्रामः","country":"देशः",
+"water":"जलम्","food":"भोजनम्","rice":"तण्डुलाः","milk":"दुग्धम्","bread":"रोटिका","fruit":"फलम्","apple":"सेवफलम्","flower":"पुष्पम्",
+"sun":"सूर्यः","moon":"चन्द्रः","star":"तारा","earth":"पृथ्वी","sky":"आकाशः","fire":"अग्निः","air":"वायुः","tree":"वृक्षः","river":"नदी","mountain":"पर्वतः",
+"day":"दिनम्","night":"रात्रिः","morning":"प्रातः","evening":"सायम्","today":"अद्य","tomorrow":"श्वः","yesterday":"ह्यः","now":"अधुना","here":"अत्र","there":"तत्र","always":"सदा","never":"कदापि न",
+"good":"उत्तमम्","bad":"दुष्टम्","big":"बृहत्","small":"लघु","new":"नूतनम्","old":"पुरातनम्","beautiful":"सुन्दरम्","happy":"प्रसन्नः","sad":"दुःखितः","easy":"सरलम्","difficult":"कठिनम्","fast":"शीघ्रम्","slow":"शनैः",
+"love":"प्रेम","peace":"शान्तिः","truth":"सत्यम्","knowledge":"ज्ञानम्","wisdom":"प्रज्ञा","life":"जीवनम्","world":"जगत्","god":"ईश्वरः",
+"go":"गच्छ","come":"आगच्छ","eat":"खाद","drink":"पिब","read":"पठ","write":"लिख","see":"पश्य","hear":"शृणु","speak":"वद","learn":"शिक्ष","teach":"शिक्षय","give":"देहि","take":"गृहाण","sit":"उपविश","stand":"तिष्ठ","sleep":"स्वप","walk":"चल","run":"धाव",
+"make":"कुरु","do":"कुरु","know":"जान","understand":"अवगच्छ","want":"इच्छ","like":"रोचते","work":"कार्यं","play":"क्रीड","help":"सहाय्यम्",
+"one":"एकम्","two":"द्वे","three":"त्रीणि","four":"चत्वारि","five":"पञ्च","six":"षट्","seven":"सप्त","eight":"अष्ट","nine":"नव","ten":"दश",
+"hundred":"शतम्","thousand":"सहस्रम्","zero":"शून्यम्","first":"प्रथमः","second":"द्वितीयः","third":"तृतीयः",
+"red":"रक्तः","blue":"नीलः","green":"हरितः","white":"श्वेतः","black":"कृष्णः","yellow":"पीतः",
+"time":"समयः","year":"वर्षम्","month":"मासः","week":"सप्ताहः","can":"शक्नोति","will":"करिष्यति","must":"अवश्यम्","should":"कर्तव्यम्","may":"शक्नोति"
+};
+function translateText(){
+const input=document.getElementById("english").value.toLowerCase().trim();
+if(!input){document.getElementById("output").textContent="Please enter English text.";return}
+let words=input.split(/(\s+|[,.!?;:])/);
+let out=words.map(w=>{let key=w.trim();return key&&D[key]!==undefined?D[key]:w}).join("");
+document.getElementById("output").textContent=out;
+}
+function clearAll(){document.getElementById("english").value="";document.getElementById("output").textContent="Translation will appear here..."}
+function copyText(){navigator.clipboard.writeText(document.getElementById("output").textContent).then(()=>alert("Translation copied!"))}
+function speak(){let t=document.getElementById("output").textContent;if(!t||t.includes("Translation will"))return;if("speechSynthesis"in window){speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(t);u.lang="hi-IN";speechSynthesis.speak(u)}}
+function toggleDark(){document.body.classList.toggle("dark");localStorage.setItem("darkMode",document.body.classList.contains("dark"))}
+if(localStorage.getItem("darkMode")==="true")document.body.classList.add("dark");
+document.getElementById("english").addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key==="Enter")translateText()});
+</script>
+</body>
+</html>
